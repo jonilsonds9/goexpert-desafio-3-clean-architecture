@@ -2,6 +2,7 @@ package webserver
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -31,7 +32,13 @@ func (s *WebServer) AddHandler(path string, handler http.HandlerFunc) {
 func (s *WebServer) Start() {
 	s.Router.Use(middleware.Logger)
 	for path, handler := range s.Handlers {
-		s.Router.Handle(path, handler)
+		if strings.HasPrefix(path, "GET ") {
+			s.Router.Get(strings.TrimPrefix(path, "GET "), handler)
+		} else if strings.HasPrefix(path, "POST ") {
+			s.Router.Post(strings.TrimPrefix(path, "POST "), handler)
+		} else {
+			s.Router.Handle(path, handler)
+		}
 	}
 	http.ListenAndServe(s.WebServerPort, s.Router)
 }
