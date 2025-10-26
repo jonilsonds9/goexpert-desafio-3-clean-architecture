@@ -46,7 +46,7 @@ func main() {
 		panic(err)
 	}
 
-	rabbitMQChannel := getRabbitMQChannel()
+	rabbitMQChannel := getRabbitMQChannel(configs)
 
 	eventDispatcher := events.NewEventDispatcher()
 	eventDispatcher.Register("OrderCreated", &handler.OrderCreatedHandler{
@@ -126,8 +126,9 @@ func runMigrations(rootDir string, db *sql.DB) error {
 	return nil
 }
 
-func getRabbitMQChannel() *amqp.Channel {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+func getRabbitMQChannel(cfg *configs.Conf) *amqp.Channel {
+	rabbitmqURL := fmt.Sprintf("amqp://%s:%s@%s:%s/", cfg.RabbitMQUser, cfg.RabbitMQPassword, cfg.RabbitMQHost, cfg.RabbitMQPort)
+	conn, err := amqp.Dial(rabbitmqURL)
 	if err != nil {
 		panic(err)
 	}
